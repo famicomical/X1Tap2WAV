@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #pragma pack(push, 1)
+
 //note: In original code, long meant 32-bits. On 64bit linux, long is 64-bits. Using int type instead
+//Modified Oct 2016 By famicomical
+
 struct WAB_CNK {
 	unsigned char name[4];
 	unsigned int size;
@@ -63,7 +66,10 @@ short tap2wav(unsigned char *tap_name,unsigned char *wav_name)
 	WCNK.size=sizeof(struct WAB_FMT);
 	fwrite(&WCNK,1,8,des);
 	if(strcmp(&freq, "TAPE")){
-		freq = 8000;
+		fseek(src, 28l, SEEK_SET);
+		fread(&freq,1,4,src);
+		rewind(src);
+		// printf("Sampling rate is %dHz\n", freq );
 	}
 	WFMT.id=1;
 	WFMT.ch_cnt=1;
@@ -120,13 +126,13 @@ void main(int argc,unsigned char *argv[])
 		}
 	}
 	if(src==NULL || des==NULL || err){
-		printf("TAP2WAV (Ver.0.1)\n");
-		printf("  ＴＡＰからＷＡＶへコンバートします\n");
-		printf("  TAP2WAV [元ファイル.TAP] [先ファイル.WAV]\n");
+		printf("TAP2WAV (Ver. 0.2)\n");
+		printf("  TAP to WAV Conversion\n");
+		printf(" Usage:\nTAP2WAV [sourcefile.tap] [targetfile.wav]\n");
 		exit(1);
 	}
 
 	if(tap2wav(src,des)) printf("Error!\n");
-	else                 printf("Ok!\n");
+	else                 printf("Conversion completed successfully!\n");
 }
 
